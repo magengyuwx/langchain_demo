@@ -1,0 +1,86 @@
+{
+  "brand": "Louis Vuitton",
+  "product_name": "Alligator Mini Boite Chapeau",
+  "price": {
+    "USD": 15295,
+    "CNY": 105536
+  },
+  "retail_price": "N/A",
+  "condition": {
+    "grade": "优秀",
+    "exterior": "痕迹、轻微磨损",
+    "hardware": "划痕、失去光泽、镀层磨损",
+    "interior": "磨损",
+    "handle": "尺码标记",
+    "accessories": [
+      "FASHIONPHILE 真品证书",
+      "行李牌",
+      "肩带"
+    ]
+  },
+  "description": {
+    "item_number": "1836269",
+    "material": "虹彩鳄鱼皮，绿色和粉色底色",
+    "details": "这款别致的单肩包采用绿色和粉色底色的虹彩鳄鱼皮制成。该包配有顶部手柄和可拆卸的可调节肩带，肩带配有抛光黄铜配件。环绕式拉链打开后，露出分隔的光滑米色皮革内部。",
+    "authenticity": "正品路易威登"
+  },
+  "dimensions": {
+    "base_length": "3 英寸",
+    "max_length": "5 英寸",
+    "height": "4.5 英寸",
+    "width": "2.25 英寸",
+    "drop_length": "21 英寸"
+  },
+  "images": [
+    {
+      "filename": "01.jpg",
+      "part": "正面",      
+      "description": "商品正面整体展示，展示虹彩鳄鱼皮绿色和粉色底色光泽"
+    },
+    {
+      "filename": "02.jpg",
+      "part": "穿搭效果",      
+      "description": "商品穿搭效果展示"
+    },
+    {
+      "filename": "03.jpg",
+      "part": "背面",      
+      "description": "商品背面整体展示"
+    },
+    {
+      "filename": "04.jpg",
+      "part": "底面",      
+      "description": "商品底面展示"
+    },
+    {
+      "filename": "05.jpg",
+      "part": "内部",
+      "description": "商品内部结构展示"
+    },
+    {
+      "filename": "06.jpg",
+      "part": "内侧商标",
+      "description": "商品内部商标展示"
+    },
+    {
+      "filename": "07.jpg",
+      "part": "外侧商标",
+      "description": "商品外部商标展示"
+    },
+    {
+      "filename": "08.jpg",
+      "part": "磨损细节图",
+      "description": "磨损细节图，展示外观痕迹和轻微磨损状况"
+    },
+    {
+      "filename": "09.jpg",
+      "part": "磨损细节图",
+      "description": "磨损细节图，展示外观痕迹和轻微磨损状况"
+    },
+    {
+      "filename": "10.jpg",
+      "part": "背带",
+      "description": "商品背带展示"
+    }
+  ]
+}
