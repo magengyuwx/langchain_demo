@@ -1,6 +1,9 @@
 from langchain_openai import ChatOpenAI
 import os
 from langchain_core.messages import HumanMessage, SystemMessage  
+from dotenv import load_dotenv
+
+load_dotenv()
 
 api_key = os.getenv("OPENROUTER_API_KEY")
 print("API 密钥读取成功：", api_key is not None)

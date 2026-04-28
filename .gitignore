@@ -1,1 +1,6 @@
 preprocess/__pycache__
+.env
+__pycache__/
+.pytest_cache/
+langchain_demo_local.egg-info
+preprocess/sample/annotation.json.bak.20260419_205604

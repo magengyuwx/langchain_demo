@@ -33,7 +33,7 @@ class Dimensions(BaseModel):
 
 class Image(BaseModel):
     filename: str
-    part: Literal["正面", "背面", "穿搭", "细节", "外侧logo", "内侧logo", "内部", "底部"] = Field(
+    part: Literal["正面/整体", "侧面/整体", "底面/整体", "穿搭", "局部细节", "外侧logo", "内侧logo", "内部"] = Field(
         description="图片部位，必须从固定集合中选择"
     )
     description: str
