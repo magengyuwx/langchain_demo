@@ -1,4 +1,7 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:conda",
-    "python-envs.defaultPackageManager": "ms-python.python:conda"
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python.defaultInterpreterPath": "d:/miniconda3/envs/langchain/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "flake8.args": ["--format=%(row)d,%(col)d,%(code).1s,%(code)s:%(text)s"]
 }
