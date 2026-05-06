@@ -23,7 +23,8 @@ qwen_url = os.getenv("QWEN_URL", "https://dashscope.aliyuncs.com/compatible-mode
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 sample_dir = os.path.join(base_dir, "sample")
-info_file = os.path.join(sample_dir, "info.txt")
+info_cn_file = os.path.join(sample_dir, "info_cn.txt")
+info_en_file = os.path.join(sample_dir, "info_en.txt")
 output_file = os.path.join(sample_dir, "annotation.json")
 
 ALLOWED_IMAGE_PARTS = (
@@ -50,6 +51,28 @@ class DetailsCorrectionResult(BaseModel):
 def read_info_file(file_path: str) -> str:
     with open(file_path, "r", encoding="utf-8") as f:
         return f.read()
+
+
+def read_product_info_texts(product_dir: str) -> tuple[str, str]:
+    info_cn_path = os.path.join(product_dir, "info_cn.txt")
+    info_en_path = os.path.join(product_dir, "info_en.txt")
+    legacy_info_path = os.path.join(product_dir, "info.txt")
+
+    if os.path.exists(info_cn_path) and os.path.exists(info_en_path):
+        info_cn_text = read_info_file(info_cn_path)
+        info_en_text = read_info_file(info_en_path)
+        print(f"已读取中文商品信息: {info_cn_path}")
+        print(f"已读取英文商品信息: {info_en_path}")
+        return info_cn_text, info_en_text
+
+    if os.path.exists(legacy_info_path):
+        info_cn_text = read_info_file(legacy_info_path)
+        print(f"已读取兼容商品信息: {legacy_info_path}")
+        return info_cn_text, ""
+
+    raise FileNotFoundError(
+        f"未找到商品信息文件，期望存在 {info_cn_path} 与 {info_en_path}，或兼容文件 {legacy_info_path}。"
+    )
 
 
 def image_to_data_url(image_path: str) -> str:
@@ -148,7 +171,7 @@ def generate_image_description(image_path: str, llm_model) -> dict:
     return {"part": part, "description": description}
 
 
-def correct_description_details(source_text: str, content: dict, llm_model) -> str:
+def correct_description_details(info_cn_text: str, info_en_text: str, content: dict, llm_model) -> str:
     structured_llm = llm_model.with_structured_output(DetailsCorrectionResult, method="json_schema")
     product_name = str(content.get("product_name", "")).strip()
     current_details = str(content.get("description", {}).get("details", "")).strip()
@@ -160,6 +183,7 @@ def correct_description_details(source_text: str, content: dict, llm_model) -> s
                 "你的任务是只修正 description.details 的中文翻译错误。"
                 "不要修改product_name字段，也不要修改 description 中的其他字段。"
                 "必须优先参考 product_name 中的原文英文名称，不要把关键商品名误译成别的中文。"
+                "请同时参考中文与英文信息，出现冲突时以两者一致信息为准，避免臆造。"
                 "输出要自然、准确、简洁。"
                 '只返回一个 JSON 对象，格式为 {"details": "..."}。'
             )
@@ -172,16 +196,19 @@ def correct_description_details(source_text: str, content: dict, llm_model) -> s
 1. 只修改 description.details
 2. 优先使用 product_name 的原文来纠正商品名称、系列名称
 3. 输出中文，但商品名要用"中文（原文）"格式，例如"古驰玛蒙特迷你链条包（Gucci Marmont Matelassé）"
-4. 不要补充 info.txt 中没有出现的事实
+4. 不要补充 info_cn.txt 或 info_en.txt 中没有出现的事实
 
 product_name:
 {product_name}
 
-当前 details:
+当前 details（中文）:
 {current_details}
 
-info.txt 原文:
-{source_text}
+info_cn.txt 原文:
+{info_cn_text}
+
+info_en.txt 原文:
+{info_en_text}
 """.strip()
         ),
     ]
@@ -198,7 +225,7 @@ info.txt 原文:
         return current_details
 
 
-def text_to_json(text: str, image_descriptions: dict, llm_model) -> dict:
+def text_to_json(info_cn_text: str, info_en_text: str, image_descriptions: dict, llm_model) -> dict:
     schema = get_annotation_schema()
     structured_llm = llm_model.with_structured_output(Annotation, method="json_schema")
 
@@ -207,6 +234,8 @@ def text_to_json(text: str, image_descriptions: dict, llm_model) -> dict:
             content=(
                 "你是一个商品标注助手。"
                 "请严格按照给定的 JSON Schema 生成结果。"
+                "输入里会同时提供中文与英文商品信息，请综合两者进行理解。"
+                "输出的所有文本字段必须为中文（品牌原文可保留在括号中）。"
                 "必须只返回一个 JSON 对象，不能返回解释、Markdown、代码块或额外文本。"
             )
         ),
@@ -226,8 +255,11 @@ def text_to_json(text: str, image_descriptions: dict, llm_model) -> dict:
 JSON Schema:
 {json.dumps(schema, ensure_ascii=False, indent=2)}
 
-商品信息:
-{text}
+中文商品信息（info_cn.txt）:
+{info_cn_text}
+
+英文商品信息（info_en.txt）:
+{info_en_text}
 
 图片描述:
 {json.dumps(image_descriptions, ensure_ascii=False, indent=2)}
@@ -251,7 +283,7 @@ JSON Schema:
         image["part"] = normalize_image_part(image.get("part", ""), image.get("description", ""))
 
     if "description" in content:
-        content["description"]["details"] = correct_description_details(text, content, llm_model)
+        content["description"]["details"] = correct_description_details(info_cn_text, info_en_text, content, llm_model)
 
     if not validate_annotation(content):
         raise ValueError("LLM 输出格式错误，需要重新生成。")
@@ -262,16 +294,12 @@ JSON Schema:
 
 def process_product_dir(product_dir: str, llm_model) -> dict:
     product_dir = os.path.abspath(product_dir)
-    info_path = os.path.join(product_dir, "info.txt")
     output_path = os.path.join(product_dir, "annotation.json")
 
     if not os.path.isdir(product_dir):
         raise FileNotFoundError(f"商品目录不存在: {product_dir}")
-    if not os.path.exists(info_path):
-        raise FileNotFoundError(f"未找到 info.txt: {info_path}")
 
-    info_text = read_info_file(info_path)
-    print(f"已读取商品信息: {info_path}")
+    info_cn_text, info_en_text = read_product_info_texts(product_dir)
 
     image_files = sorted(
         f for f in os.listdir(product_dir) if f.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))
@@ -285,7 +313,7 @@ def process_product_dir(product_dir: str, llm_model) -> dict:
         image_descriptions[image_file] = generate_image_description(image_path, llm_model)
 
     print("正在生成 JSON...")
-    json_output = text_to_json(info_text, image_descriptions, llm_model)
+    json_output = text_to_json(info_cn_text, info_en_text, image_descriptions, llm_model)
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(json_output, f, ensure_ascii=False, indent=2)

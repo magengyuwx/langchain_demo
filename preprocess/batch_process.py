@@ -4,7 +4,8 @@ from typing import Any
 
 from txt2json import build_default_llm, process_product_dir
 
-products_dir = r"D:\git\LV-Dataset\products"
+products_dir = r"C:\magengyu\商品库\LouisVuitton"
+
 
 def batch_process_products(products_dir: str) -> list[dict[str, str]]:
     products_dir = os.path.abspath(products_dir)

@@ -1,9 +1,9 @@
 {
-  "brand": "Louis Vuitton",
-  "product_name": "Alligator Mini Boite Chapeau",
+  "brand": "路易威登 (Louis Vuitton)",
+  "product_name": "Louis Vuitton Alligator Mini Boite Chapeau",
   "price": {
-    "USD": 15295,
-    "CNY": 105536
+    "USD": 15295.0,
+    "CNY": 105536.0
   },
   "retail_price": "",
   "condition": {
@@ -20,8 +20,8 @@
   },
   "description": {
     "item_number": "1836269",
-    "material": "鳄鱼皮",
-    "details": "这是正品路易威登鳄鱼皮迷你帽子包（Louis Vuitton Alligator Mini Boite Chapeau）。这款别致的单肩包采用绿色和粉色底色的虹彩鳄鱼皮制成。该包配有顶部手柄和可拆卸的可调节肩带，肩带配有抛光黄铜配件。环绕式拉链打开后，露出分隔的光滑米色皮革内部。",
+    "material": "绿色和粉色底色的虹彩鳄鱼皮",
+    "details": "这是一款路易威登（Louis Vuitton）鳄鱼皮迷你 Boite Chapeau 包。这款别致的单肩包采用绿色和粉色底色的虹彩鳄鱼皮制成。该包配有顶部手柄和可拆卸的可调节肩带，肩带配有抛光黄铜配件。环绕式拉链打开后，露出分隔的光滑米色皮革内部。",
     "authenticity": "正品"
   },
   "dimensions": {
@@ -34,53 +34,53 @@
   "images": [
     {
       "filename": "01.jpg",
-      "part": "正面",
-      "description": "浅绿色鳄鱼皮纹理圆形手袋正面，配有金色LV标志金属扣饰及同材质皮质搭扣带，肩带可调节并带有金色金属配件。"
+      "part": "正面/整体",
+      "description": "这是一款圆形手提包的正面展示图，包身采用浅绿色鳄鱼纹皮革材质，表面带有粉色缝线装饰。包的正面中央有一个方形皮革标签，上面镶嵌着金色的LV双G标志。包的顶部配有同色系皮革提手和金色金属扣件，左侧延伸出一条可调节长度的肩带，同样采用鳄鱼纹皮革和金色五金件。"
     },
     {
       "filename": "02.jpg",
       "part": "穿搭",
-      "description": "模特侧身展示一款浅绿色鳄鱼纹圆形小包，斜挎于身前，包身正面可见LV金属挂饰与拉链细节。"
+      "description": "模特身穿灰色长袖连衣裙，肩挎一款绿色鳄鱼纹圆形手提包，包身正面可见金属扣饰和品牌标识。"
     },
     {
       "filename": "03.jpg",
-      "part": "背面",
-      "description": "圆形浅绿色鳄鱼纹皮革包身，正面中央有同材质饰片与两颗铆钉装饰，金色拉链与金属扣件点缀，肩带为同色系鳄鱼纹可调节设计。"
+      "part": "侧面/整体",
+      "description": "这款圆形手提包展示了其正面和侧面细节，包身采用浅绿色鳄鱼纹皮革材质，配有金色金属扣件和可调节肩带。"
     },
     {
       "filename": "04.jpg",
-      "part": "底部",
-      "description": "浅绿色鳄鱼纹皮革圆形手提包侧面，配有金色拉链和金属扣件，顶部可见黑色皮质提手与金色五金配件。"
+      "part": "侧面/整体",
+      "description": "绿色鳄鱼纹手提包的侧面特写，展示了其金色拉链和精致的纹理细节。"
     },
     {
       "filename": "05.jpg",
       "part": "内部",
-      "description": "包内衬为米色皮革材质，底部饰有黑色菱格纹压线图案，边缘可见金色拉链与浅绿色包身边缘，内部结构清晰，含多层隔层设计。"
+      "description": "圆形包的内部视角，展示了米色皮革材质的内衬、带有黑色线条格纹图案的底部以及多个分隔口袋。"
     },
     {
       "filename": "06.jpg",
       "part": "内部",
-      "description": "浅棕色菱格纹皮革内衬，中央印有黑色'LOUIS VUITTON PARIS made in Italy'字样及注册商标符号，右上角可见金色拉链齿细节。"
+      "description": "图片展示了路易威登（LOUIS VUITTON）品牌的内部标签细节，背景为品牌经典的菱格纹图案，中央印有 'LOUIS VUITTON PARIS' 品牌名称及 'made in Italy' 制造地信息。"
     },
     {
       "filename": "07.jpg",
-      "part": "正面",
-      "description": "浅绿色鳄鱼皮纹理手袋正面局部，中央饰有金色LV金属标志，上方配有同色系皮质搭扣与金色金属扣件，缝线细致，边缘为黑色滚边。"
+      "part": "正面/整体",
+      "description": "图片展示了绿色鳄鱼纹皮革手袋的局部细节，重点为正面的搭扣和LV金属logo装饰。"
     },
     {
       "filename": "08.jpg",
-      "part": "细节",
-      "description": "浅绿色鳄鱼纹皮革手袋的侧面特写，展示金色双拉链头、精细缝线及纹理细节。"
+      "part": "侧面/整体",
+      "description": "绿色鳄鱼纹手提包的侧面局部细节，展示了金色拉链和精致的缝线工艺。"
     },
     {
       "filename": "09.jpg",
-      "part": "细节",
-      "description": "浅绿色鳄鱼纹皮革手袋的侧面细节，展示金色拉链、缝线工艺及顶部黑色皮质提手与金属扣件。"
+      "part": "侧面/整体",
+      "description": "绿色鳄鱼纹手提包的侧面局部细节，展示了金色拉链、缝线和包身纹理。"
     },
     {
       "filename": "10.jpg",
-      "part": "细节",
-      "description": "浅绿色皮革带细节，可见同色缝线、三个金属铆钉孔及边缘黑色包边。"
+      "part": "局部细节",
+      "description": "绿色皮革带的局部细节，展示缝线和金属孔眼。"
     }
   ]
 }
