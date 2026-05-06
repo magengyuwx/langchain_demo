@@ -2,27 +2,41 @@
 import os
 from typing import Any
 from preprocess.txt2json import ALLOWED_IMAGE_PARTS
+from tqdm import tqdm
 
 
-products_dir = r"D:\git\LV-Dataset\LouisVuitton"
-output_dir = r"D:\git\LV-Dataset\LouisVuitton"
-output_file = "part_label.jsonl"
+products_dir = r"C:\magengyu\商品库\LouisVuitton"
+output_dir = r"C:\magengyu\商品库\LouisVuitton"
+output_file = "image_label.jsonl"
 
 allowed_parts = tuple(ALLOWED_IMAGE_PARTS)
 
-USER_PROMPT_TEMPLATE = "这个图像是商品的哪个部位？候选包括：{parts}"
+USER_PROMPT_TEMPLATE = (
+    "请识别这张商品图像并输出 JSON。"
+    "part 候选包括：{parts}。"
+    "description 需要简洁描述图中关键可见内容。"
+    "只输出一个 JSON 对象，格式为 "
+    '{{"part":"...","description":"..."}}'
+)
 
 
 def _normalize_path(path: str) -> str:
     return path.replace("\\", "/")
 
 
-def _build_sample(image_path: str, part: str) -> dict[str, Any]:
+def _build_sample(image_path: str, part: str, description: str) -> dict[str, Any]:
     user_text = f"<image>{USER_PROMPT_TEMPLATE.format(parts=', '.join(allowed_parts))}"
+    assistant_output = json.dumps(
+        {
+            "part": part,
+            "description": description,
+        },
+        ensure_ascii=False,
+    )
     sample = {
         "messages": [
             {"role": "user", "content": user_text},
-            {"role": "assistant", "content": part},
+            {"role": "assistant", "content": assistant_output},
         ],
         "images": [_normalize_path(image_path)],
     }
@@ -37,7 +51,7 @@ def _build_sample(image_path: str, part: str) -> dict[str, Any]:
 
 
 def generate_vlm_dataset(
-    products_root: str, images_output_dir: str, label_file_name: str
+    products_root: str, images_output_dir: str, image_label_file_name: str
 ) -> dict[str, Any]:
     products_root = os.path.abspath(products_root)
     images_output_dir = os.path.abspath(images_output_dir)
@@ -46,7 +60,7 @@ def generate_vlm_dataset(
         raise FileNotFoundError(f"products_dir 不存在: {products_root}")
 
     os.makedirs(images_output_dir, exist_ok=True)
-    label_path = os.path.join(images_output_dir, label_file_name)
+    image_label_path = os.path.join(images_output_dir, image_label_file_name)
 
     samples: list[dict[str, Any]] = []
     total_images = 0
@@ -55,7 +69,7 @@ def generate_vlm_dataset(
     product_paths = [
         entry.path for entry in os.scandir(products_root) if entry.is_dir(follow_symlinks=False)
     ]
-    for product_path in product_paths:
+    for product_path in tqdm(product_paths, desc="处理商品", unit="商品"):
 
         annotation_path = os.path.join(product_path, "annotation.json")
         if not os.path.isfile(annotation_path):
@@ -75,6 +89,7 @@ def generate_vlm_dataset(
 
             file_name = str(image_item.get("filename", "")).strip()
             part = str(image_item.get("part", "")).strip()
+            description = str(image_item.get("description", "")).strip()
             if not file_name or not part:
                 skipped_images += 1
                 continue
@@ -82,11 +97,16 @@ def generate_vlm_dataset(
                 skipped_images += 1
                 continue
 
-            image_rel_path = os.path.relpath(os.path.join(product_path, file_name), products_root)
-            samples.append(_build_sample(image_rel_path, part))
+            image_abs_path = os.path.join(product_path, file_name)
+            if not os.path.isfile(image_abs_path):
+                skipped_images += 1
+                continue
+
+            image_rel_path = os.path.relpath(image_abs_path, products_root)
+            samples.append(_build_sample(image_rel_path, part, description))
             total_images += 1
 
-    with open(label_path, "w", encoding="utf-8") as f:
+    with open(image_label_path, "w", encoding="utf-8") as f:
         for sample in samples:
             f.write(json.dumps(sample, ensure_ascii=False))
             f.write("\n")
@@ -94,7 +114,7 @@ def generate_vlm_dataset(
     stats = {
         "products_root": products_root,
         "output_dir": images_output_dir,
-        "label_file": label_path,
+        "image_label_file": image_label_path,
         "samples": total_images,
         "skipped_images": skipped_images,
     }
@@ -105,7 +125,7 @@ def main() -> None:
     stats = generate_vlm_dataset(products_dir, output_dir, output_file)
     print(f"已生成 {stats['samples']} 条样本，跳过 {stats['skipped_images']} 条。")
     print(f"图片目录: {stats['output_dir']}")
-    print(f"标注文件: {stats['label_file']}")
+    print(f"图像标注文件: {stats['image_label_file']}")
 
 
 if __name__ == "__main__":

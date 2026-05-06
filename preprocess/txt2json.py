@@ -36,11 +36,12 @@ ALLOWED_IMAGE_PARTS = (
     "外侧logo",
     "内侧logo",
     "内部",
+    "五金"
 )
 
 
 class ImageDescriptionResult(BaseModel):
-    part: Literal["正面/整体", "侧面/整体", "底面/整体", "穿搭", "局部细节", "外侧logo", "内侧logo", "内部"]
+    part: Literal["正面/整体", "侧面/整体", "底面/整体", "穿搭", "局部细节", "外侧logo", "内侧logo", "内部", "五金"]
     description: str
 
 
@@ -102,7 +103,8 @@ def normalize_image_part(part_text: str, description_text: str = "") -> str:
         ("穿搭", ["穿搭", "上身", "模特", "肩背", "斜挎", "手提展示", "背上效果"]),
         ("侧面/整体", ["侧面", "侧边", "侧视"]),
         ("正面/整体", ["正面", "前面", "包身正面", "整体", "全貌", "背面", "背部", "后面", "反面"]),
-        ("局部细节", ["细节", "特写", "近景", "五金", "拉链", "边角", "纹理", "刻印", "logo"]),
+        ("局部细节", ["细节", "特写", "近景", "边角", "纹理", "刻印"]),
+        ("五金", ["五金", "金属", "扣件", "链条", "拉链", "装饰件"]),
     ]
 
     for standard_part, keywords in rules:
@@ -304,6 +306,10 @@ def process_product_dir(product_dir: str, llm_model) -> dict:
     image_files = sorted(
         f for f in os.listdir(product_dir) if f.lower().endswith((".jpg", ".jpeg", ".png", ".webp"))
     )
+    if len(image_files) == 0:
+        print(f"目录 {product_dir} 下没有图片，已跳过。")
+        return None
+
     print(f"找到 {len(image_files)} 张图片")
 
     image_descriptions = {}
