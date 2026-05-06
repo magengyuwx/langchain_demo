@@ -1,67 +1,43 @@
 ﻿import json
 import os
-import shutil
 from typing import Any
 from preprocess.txt2json import ALLOWED_IMAGE_PARTS
 
 
-products_dir = r"D:\git\LV-Dataset\products"
-output_dir = r"D:\git\LV-Dataset\vlm_dataset"
-output_file = "data.jsonl"
-subdirs_file = "annotation_subdirs.json"
+products_dir = r"D:\git\LV-Dataset\LouisVuitton"
+output_dir = r"D:\git\LV-Dataset\LouisVuitton"
+output_file = "part_label.jsonl"
 
 allowed_parts = tuple(ALLOWED_IMAGE_PARTS)
 
-SYSTEM_PROMPT = "你是一个奢侈品商品图像部位识别助手。请只输出部位名称。"
 USER_PROMPT_TEMPLATE = "这个图像是商品的哪个部位？候选包括：{parts}"
 
 
-def _load_subdir_names(root_dir: str, file_name: str) -> list[str]:
-    file_path = os.path.join(root_dir, file_name)
-    if not os.path.isfile(file_path):
-        raise FileNotFoundError(f"未找到子目录清单文件: {file_path}")
-
-    with open(file_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    if not isinstance(data, list):
-        raise ValueError(f"{file_path} 格式错误，必须是字符串数组。")
-
-    names = []
-    for item in data:
-        if isinstance(item, str) and item.strip():
-            names.append(item.strip())
-    return names
+def _normalize_path(path: str) -> str:
+    return path.replace("\\", "/")
 
 
-def _safe_copy_image(src_path: str, dst_dir: str, product_name: str) -> str:
-    original_name = os.path.basename(src_path)
-    base, ext = os.path.splitext(original_name)
-    candidate = f"{product_name}__{base}{ext}"
-    dst_path = os.path.join(dst_dir, candidate)
-
-    shutil.copy2(src_path, dst_path)
-    return candidate
-
-
-def _build_sample(image_name: str, part: str) -> dict[str, Any]:
-    return {
+def _build_sample(image_path: str, part: str) -> dict[str, Any]:
+    user_text = f"<image>{USER_PROMPT_TEMPLATE.format(parts=', '.join(allowed_parts))}"
+    sample = {
         "messages": [
-            {"role": "system", "content": [{"text": SYSTEM_PROMPT}]},
-            {
-                "role": "user",
-                "content": [
-                    {"text": USER_PROMPT_TEMPLATE.format(parts=", ".join(allowed_parts))},
-                    {"image": image_name},
-                ],
-            },
-            {"role": "assistant", "content": [{"text": part}]},
-        ]
+            {"role": "user", "content": user_text},
+            {"role": "assistant", "content": part},
+        ],
+        "images": [_normalize_path(image_path)],
+    }
+
+    if user_text.count("<image>") != len(sample["images"]):
+        raise ValueError("样本中的 <image> 数量与 images 列数量不一致。")
+
+    return {
+        "messages": sample["messages"],
+        "images": sample["images"],
     }
 
 
 def generate_vlm_dataset(
-    products_root: str, images_output_dir: str, label_file_name: str, subdir_list_file: str
+    products_root: str, images_output_dir: str, label_file_name: str
 ) -> dict[str, Any]:
     products_root = os.path.abspath(products_root)
     images_output_dir = os.path.abspath(images_output_dir)
@@ -76,12 +52,10 @@ def generate_vlm_dataset(
     total_images = 0
     skipped_images = 0
 
-    subdir_names = _load_subdir_names(products_root, subdir_list_file)
-    for subdir_name in subdir_names:
-        product_path = os.path.join(products_root, subdir_name)
-        if not os.path.isdir(product_path):
-            skipped_images += 1
-            continue
+    product_paths = [
+        entry.path for entry in os.scandir(products_root) if entry.is_dir(follow_symlinks=False)
+    ]
+    for product_path in product_paths:
 
         annotation_path = os.path.join(product_path, "annotation.json")
         if not os.path.isfile(annotation_path):
@@ -108,18 +82,14 @@ def generate_vlm_dataset(
                 skipped_images += 1
                 continue
 
-            src_image = os.path.join(product_path, file_name)
-            if not os.path.isfile(src_image):
-                skipped_images += 1
-                continue
-
-            copied_name = _safe_copy_image(src_image, images_output_dir, subdir_name)
-            samples.append(_build_sample(copied_name, part))
+            image_rel_path = os.path.relpath(os.path.join(product_path, file_name), products_root)
+            samples.append(_build_sample(image_rel_path, part))
             total_images += 1
 
     with open(label_path, "w", encoding="utf-8") as f:
-        for row in samples:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+        for sample in samples:
+            f.write(json.dumps(sample, ensure_ascii=False))
+            f.write("\n")
 
     stats = {
         "products_root": products_root,
@@ -132,7 +102,7 @@ def generate_vlm_dataset(
 
 
 def main() -> None:
-    stats = generate_vlm_dataset(products_dir, output_dir, output_file, subdirs_file)
+    stats = generate_vlm_dataset(products_dir, output_dir, output_file)
     print(f"已生成 {stats['samples']} 条样本，跳过 {stats['skipped_images']} 条。")
     print(f"图片目录: {stats['output_dir']}")
     print(f"标注文件: {stats['label_file']}")
@@ -140,5 +110,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

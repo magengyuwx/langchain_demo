@@ -2,7 +2,7 @@ import json
 import os
 
 
-products_dir = r"D:\git\LV-Dataset\products"
+products_dir = r"D:\git\LV-Dataset\LouisVuitton"
 output_file = "annotation_subdirs.json"
 
 
