@@ -2,7 +2,7 @@
 
 本项目用于奢侈品商品数据处理，核心能力包括：
 
-1. 将单个商品目录中的 `info.txt + 图片` 转为结构化 `annotation.json`
+1. 将单个商品目录中的 `info_cn.txt + info_en.txt + 图片` 转为结构化 `annotation.json`
 2. 批量处理多个商品目录
 3. 提供本地网页工具查看和编辑 `annotation.json`
 4. 将标注数据导出为 VLM 训练格式（`jsonl + 图片`）
@@ -14,7 +14,7 @@
 ```text
 langchain_demo/
 ├─ preprocess/
-│  ├─ txt2json.py              # 单商品：info.txt + 图片 -> annotation.json
+│  ├─ txt2json.py              # 单商品：info_cn.txt + info_en.txt + 图片 -> annotation.json（兼容旧 info.txt）
 │  ├─ batch_process.py         # 批量处理商品目录
 │  ├─ web_viewer.py            # 本地 Web 标注查看/编辑工具
 │  ├─ validate_annotation.py   # annotation schema 与校验
@@ -51,18 +51,19 @@ pip install -U pydantic python-dotenv langchain-core langchain-openai langchain-
 
 ## 3. `.env` 配置
 
-在项目根目录创建 `.env`，至少配置千问（`preprocess/txt2json.py` 默认走 Qwen）：
+在项目根目录创建 `.env`。当前 `preprocess/txt2json.py` 默认走 Qwen：
 
 ```env
 QWEN_API_KEY=你的key
-QWEN_MODEL=qwen3-vl-plus
+QWEN_MODEL=qwen-plus
 QWEN_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 ```
 
-如果需要测试其他模型，可额外配置：
+如果需要测试本地 Ollama，可额外配置：
 
 ```env
-OPENROUTER_API_KEY=你的key
+OLLAMA_BASE_URL=http://192.168.18.213:11434
+OLLAMA_MODEL=qwen3-vl
 ```
 
 ---
@@ -73,12 +74,18 @@ OPENROUTER_API_KEY=你的key
 
 ```text
 某商品目录/
-├─ info.txt
+├─ info_cn.txt
+├─ info_en.txt
 ├─ 01.jpg
 ├─ 02.jpg
 ├─ ...
 └─ annotation.json  # 运行后生成
 ```
+
+兼容说明：
+
+- 若目录中只有旧版 `info.txt`，`txt2json.py` 仍可处理。
+- 若存在 `info_cn.txt` 与 `info_en.txt`，会同时送给模型分析，并输出中文版 `annotation.json`。
 
 `txt2json.py` 会读取目录中的图片扩展名：
 
@@ -137,7 +144,7 @@ python preprocess/web_viewer.py --root D:\git\LV-Dataset\products --host 127.0.0
 功能说明：
 
 1. 浏览商品目录
-2. 展示 `info.txt`、图片和 `annotation.json`
+2. 展示 `info.txt`、图片和 `annotation.json`（当前 Web 工具仍读取 `info.txt`）
 3. 修改图片部位/描述后自动保存
 4. 保存时自动备份旧文件为 `annotation.json.bak.YYYYMMDD_HHMMSS`
 
@@ -223,7 +230,7 @@ python dataset/generate_image_label.py
 ## 9. 建议的最小工作流
 
 1. 配置 `.env`（至少 `QWEN_API_KEY`）
-2. 准备商品目录（`info.txt + 图片`）
+2. 准备商品目录（推荐 `info_cn.txt + info_en.txt + 图片`，兼容旧 `info.txt`）
 3. 执行 `python preprocess/txt2json.py` 或 `python preprocess/batch_process.py`
 4. 用 `python preprocess/web_viewer.py --root ...` 人工校对
 5. 执行 `python dataset/generate_list.py` 与 `python dataset/generate_image_label.py` 导出训练数据
